@@ -18,11 +18,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
 import stirling.software.SPDF.config.interfaces.DatabaseBackupInterface;
 import stirling.software.SPDF.config.security.saml2.CustomSaml2AuthenticatedPrincipal;
 import stirling.software.SPDF.config.security.session.SessionPersistentRegistry;
 import stirling.software.SPDF.controller.api.pipeline.UserServiceInterface;
+import stirling.software.SPDF.model.ApplicationProperties;
 import stirling.software.SPDF.model.AuthenticationType;
 import stirling.software.SPDF.model.Authority;
 import stirling.software.SPDF.model.Role;
@@ -31,6 +34,7 @@ import stirling.software.SPDF.repository.AuthorityRepository;
 import stirling.software.SPDF.repository.UserRepository;
 
 @Service
+@Slf4j
 public class UserService implements UserServiceInterface {
 
     @Autowired private UserRepository userRepository;
@@ -45,8 +49,21 @@ public class UserService implements UserServiceInterface {
 
     @Autowired DatabaseBackupInterface databaseBackupHelper;
 
+    @Autowired ApplicationProperties applicationProperties;
+
+    @Transactional
+    public void migrateOauth2ToSSO() {
+        userRepository
+                .findByAuthenticationTypeIgnoreCase("OAUTH2")
+                .forEach(
+                        user -> {
+                            user.setAuthenticationType(AuthenticationType.SSO);
+                            userRepository.save(user);
+                        });
+    }
+
     // Handle OAUTH2 login and user auto creation.
-    public boolean processOAuth2PostLogin(String username, boolean autoCreateUser)
+    public boolean processSSOPostLogin(String username, boolean autoCreateUser)
             throws IllegalArgumentException, IOException {
         if (!isUsernameValid(username)) {
             return false;
@@ -56,7 +73,7 @@ public class UserService implements UserServiceInterface {
             return true;
         }
         if (autoCreateUser) {
-            saveUser(username, AuthenticationType.OAUTH2);
+            saveUser(username, AuthenticationType.SSO);
             return true;
         }
         return false;
@@ -299,7 +316,13 @@ public class UserService implements UserServiceInterface {
         boolean isValidEmail =
                 username.matches(
                         "^(?=.{1,64}@)[A-Za-z0-9]+(\\.[A-Za-z0-9_+.-]+)*@[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$");
-        return isValidSimpleUsername || isValidEmail;
+
+        List<String> notAllowedUserList = new ArrayList<>();
+        notAllowedUserList.add("ALL_USERS".toLowerCase());
+
+        boolean notAllowedUser = notAllowedUserList.contains(username.toLowerCase());
+
+        return (isValidSimpleUsername || isValidEmail) && !notAllowedUser;
     }
 
     private String getInvalidUsernameMessage() {
@@ -354,6 +377,14 @@ public class UserService implements UserServiceInterface {
 
         if (principal instanceof UserDetails) {
             return ((UserDetails) principal).getUsername();
+        } else if (principal instanceof OAuth2User) {
+            return ((OAuth2User) principal)
+                    .getAttribute(
+                            applicationProperties.getSecurity().getOauth2().getUseAsUsername());
+        } else if (principal instanceof CustomSaml2AuthenticatedPrincipal) {
+            return ((CustomSaml2AuthenticatedPrincipal) principal).getName();
+        } else if (principal instanceof String) {
+            return (String) principal;
         } else {
             return principal.toString();
         }

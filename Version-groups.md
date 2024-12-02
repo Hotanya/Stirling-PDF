@@ -8,7 +8,7 @@ The 'Fat' container contains all those found in 'Full' with security jar along w
 | Libre      |            |   ✔️   |
 | Python     |            |   ✔️   |
 | OpenCV     |            |   ✔️   |
-| OCRmyPDF   |            |   ✔️   |
+| qpdf   |            |   ✔️   |
 
 | Operation              | Ultra-Lite | Full |
 | ---------------------- | ---------- | ---- |
@@ -54,3 +54,15 @@ The 'Fat' container contains all those found in 'Full' with security jar along w
 | ocr-pdf                |            | ✔️    |
 | pdf-to-pdfa            |            | ✔️    |
 | remove-blanks          |            | ✔️    |
+pdf-to-text             |     ✔️      |  ✔️
+pdf-to-html             |            |  ✔️
+pdf-to-word             |            |  ✔️
+pdf-to-presentation     |            |  ✔️
+pdf-to-xml              |            |  ✔️
+remove-annotations      |     ✔️      |  ✔️
+remove-cert-sign        |     ✔️      |  ✔️
+remove-image-pdf        |     ✔️      |  ✔️
+file-to-pdf             |            |  ✔️
+html-to-pdf             |            |  ✔️
+url-to-pdf              |            |  ✔️
+repair                  |            |  ✔️

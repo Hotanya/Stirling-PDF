@@ -47,6 +47,7 @@ public class ApplicationProperties {
     private AutomaticallyGenerated automaticallyGenerated = new AutomaticallyGenerated();
     private EnterpriseEdition enterpriseEdition = new EnterpriseEdition();
     private AutoPipeline autoPipeline = new AutoPipeline();
+    private ProcessExecutor processExecutor = new ProcessExecutor();
 
     @Data
     public static class AutoPipeline {
@@ -306,6 +307,100 @@ public class ApplicationProperties {
 
             public String getProducer() {
                 return producer == null || producer.trim().isEmpty() ? "Stirling-PDF" : producer;
+            }
+        }
+    }
+
+    @Data
+    public static class ProcessExecutor {
+        private SessionLimit sessionLimit = new SessionLimit();
+        private TimeoutMinutes timeoutMinutes = new TimeoutMinutes();
+
+        @Data
+        public static class SessionLimit {
+            private int libreOfficeSessionLimit;
+            private int pdfToHtmlSessionLimit;
+            private int pythonOpenCvSessionLimit;
+            private int weasyPrintSessionLimit;
+            private int installAppSessionLimit;
+            private int calibreSessionLimit;
+            private int qpdfSessionLimit;
+            private int tesseractSessionLimit;
+
+            public int getQpdfSessionLimit() {
+                return qpdfSessionLimit > 0 ? qpdfSessionLimit : 2;
+            }
+
+            public int getTesseractSessionLimit() {
+                return tesseractSessionLimit > 0 ? tesseractSessionLimit : 1;
+            }
+
+            public int getLibreOfficeSessionLimit() {
+                return libreOfficeSessionLimit > 0 ? libreOfficeSessionLimit : 1;
+            }
+
+            public int getPdfToHtmlSessionLimit() {
+                return pdfToHtmlSessionLimit > 0 ? pdfToHtmlSessionLimit : 1;
+            }
+
+            public int getPythonOpenCvSessionLimit() {
+                return pythonOpenCvSessionLimit > 0 ? pythonOpenCvSessionLimit : 8;
+            }
+
+            public int getWeasyPrintSessionLimit() {
+                return weasyPrintSessionLimit > 0 ? weasyPrintSessionLimit : 16;
+            }
+
+            public int getInstallAppSessionLimit() {
+                return installAppSessionLimit > 0 ? installAppSessionLimit : 1;
+            }
+
+            public int getCalibreSessionLimit() {
+                return calibreSessionLimit > 0 ? calibreSessionLimit : 1;
+            }
+        }
+
+        @Data
+        public static class TimeoutMinutes {
+            private long libreOfficeTimeoutMinutes;
+            private long pdfToHtmlTimeoutMinutes;
+            private long pythonOpenCvTimeoutMinutes;
+            private long weasyPrintTimeoutMinutes;
+            private long installAppTimeoutMinutes;
+            private long calibreTimeoutMinutes;
+            private long tesseractTimeoutMinutes;
+            private long qpdfTimeoutMinutes;
+
+            public long getTesseractTimeoutMinutes() {
+                return tesseractTimeoutMinutes > 0 ? tesseractTimeoutMinutes : 30;
+            }
+
+            public long getQpdfTimeoutMinutes() {
+                return qpdfTimeoutMinutes > 0 ? qpdfTimeoutMinutes : 30;
+            }
+
+            public long getLibreOfficeTimeoutMinutes() {
+                return libreOfficeTimeoutMinutes > 0 ? libreOfficeTimeoutMinutes : 30;
+            }
+
+            public long getPdfToHtmlTimeoutMinutes() {
+                return pdfToHtmlTimeoutMinutes > 0 ? pdfToHtmlTimeoutMinutes : 20;
+            }
+
+            public long getPythonOpenCvTimeoutMinutes() {
+                return pythonOpenCvTimeoutMinutes > 0 ? pythonOpenCvTimeoutMinutes : 30;
+            }
+
+            public long getWeasyPrintTimeoutMinutes() {
+                return weasyPrintTimeoutMinutes > 0 ? weasyPrintTimeoutMinutes : 30;
+            }
+
+            public long getInstallAppTimeoutMinutes() {
+                return installAppTimeoutMinutes > 0 ? installAppTimeoutMinutes : 60;
+            }
+
+            public long getCalibreTimeoutMinutes() {
+                return calibreTimeoutMinutes > 0 ? calibreTimeoutMinutes : 30;
             }
         }
     }
